@@ -80,23 +80,54 @@ QList<QextPortInfo> QextSerialEnumeratorPrivate::getPorts_sys()
     udev_enumerate_add_match_subsystem(enumerate, "tty");
     udev_enumerate_scan_devices(enumerate);
     struct udev_list_entry *list = udev_enumerate_get_list_entry(enumerate);
-    struct udev_list_entry *entry;
+    struct udev_list_entry *entry = new udev_list_entry;
+    
     udev_list_entry_foreach(entry, list) {
-        const char *path;
-        struct udev_device *dev;
+        const char *path = NULL;
+        struct udev_device *dev = NULL;
 
         // Have to grab the actual udev device here...
+        try{
         path = udev_list_entry_get_name(entry);
+        }
+        catch(...){
+            delete entry;
+            throw;
+        }
+        try{
         dev = udev_device_new_from_syspath(ud, path);
-
+        }
+        catch(...){
+            delete ud;
+            delete path;
+            throw;
+        }
         returnVal.append(portInfoFromDevice(dev));
 
         // Done with this device
+        try{
         udev_device_unref(dev);
+        }
+        catch(...){
+            delete dev;
+            throw;
+        }
     }
     // Done with the list and this udev
+    try{
     udev_enumerate_unref(enumerate);
+    }
+    catch(...){
+        delete enumerate;
+        throw;
+    }
+    try{
     udev_unref(ud);
+    }
+    catch(...){
+        delete ud;
+        throw;
+    }
 
     return returnVal;
 }
@@ -132,10 +163,15 @@ void QextSerialEnumeratorPrivate::_q_deviceEvent()
     Q_Q(QextSerialEnumerator);
     struct udev_device *dev = udev_monitor_receive_device(monitor);
     if (dev) {
+        try{
         QextPortInfo pi = portInfoFromDevice(dev);
-
         QLatin1String action(udev_device_get_action(dev));
         udev_device_unref(dev);
+        }
+        catch(...){
+            delete dev;
+            throw;
+        }
 
         if (action == QLatin1String("add"))
             Q_EMIT q->deviceDiscovered(pi);
