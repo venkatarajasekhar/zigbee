@@ -28,7 +28,7 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-
+#include "moc_qextserialenumerator.cpp"
 #include "qextserialenumerator.h"
 #include "qextserialenumerator_p.h"
 
@@ -166,4 +166,4 @@ void QextSerialEnumerator::setUpNotifications()
         QESP_WARNING("Setup Notification Failed...");
 }
 
-#include "moc_qextserialenumerator.cpp"
+
